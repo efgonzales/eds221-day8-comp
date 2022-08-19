@@ -205,3 +205,45 @@ ggplot(data = jornada_veg) +
   scale_fill_paletteer_d(palette = "ggthemes::manyeys")
 ```
 
+#Heat-map:tiled plot
+```{r}
+lizard_counts <- lizards |> 
+  mutate(date = lubridate::mdy(date)) |> 
+  count(year = lubridate::year(date), common_name) |> 
+  drop_na()
+```
+
+```{r}
+ggplot(data = lizard_counts, aes(x = year, y = common_name)) +
+  geom_tile(aes(fill = n), show.legend = FALSE) +
+  geom_text(aes(label = n), color = "white", size = 3) +
+  scale_fill_gradientn(colors = c("navy", "red", "orange")) +
+  theme_minimal()
+```
+
+##Beeswarm plot: better than jitter & violin? can only handle so many points...if your sample sizes are huge, not the best option
+```{r}
+whiptails <- whiptails |> 
+  filter(common_name == "western whiptail") |> 
+  drop_na(total_length, weight)
+```
+
+```{r}
+whip_plot1 <- ggplot(data = whiptails, aes(x = sex, y = weight)) + geom_beeswarm() +
+  geom_boxplot(fill = NA) 
+```
+
+## Marginal plot
+```{r}
+whip_plot <- ggplot(data = whiptails, aes(x = total_length, y = weight)) + geom_point(aes(color = sex)) + 
+  theme(legend.position = "bottom")
+
+ggMarginal(whip_plot, type = "boxplot", groupColour = TRUE)
+```
+
+## Patchwork
+```{r}
+((whip_plot1 + whip_plot) / whip_plot1) + whip_plot & theme_minimal()
+
+```
+
